@@ -1,8 +1,10 @@
 import connection from "../database/database.js";
+import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
 
 async function createNewUser(req, res) {
   const { name, email, password, confirmPassword } = req.body;
+  const passwordHash = bcrypt.hashSync(password, 10);
 
   try {
     await connection.query(
