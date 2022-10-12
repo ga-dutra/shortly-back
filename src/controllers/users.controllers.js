@@ -21,7 +21,6 @@ async function postLogin(req, res) {
   const user = res.locals.user;
   const token = uuid();
   const sessionType = "login";
-  console.log(user);
   try {
     await connection.query(
       `INSERT INTO sessions ("userId", token, type) VALUES ($1, $2, $3)`,
