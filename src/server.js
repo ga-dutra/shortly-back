@@ -11,7 +11,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 4000;
 
-app.use("", usersRouter);
+app.use("/auth", usersRouter);
 
 app.listen(PORT, () => {
   console.log("Server is listening on port", PORT);
