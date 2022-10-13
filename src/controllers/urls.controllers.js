@@ -30,7 +30,7 @@ async function shortUrl(req, res) {
 async function getUrlById(req, res) {
   const { urlId } = req.params;
 
-  if (!urlId || typeof urlId !== "number") {
+  if (!urlId || isNaN(Number(urlId))) {
     return res.status(401).send({ error: "Url sent as params is not valid" });
   }
 
@@ -55,4 +55,33 @@ async function getUrlById(req, res) {
   }
 }
 
-export { shortUrl, getUrlById };
+async function deleteUrlById(req, res) {
+  const userId = res.locals.userId;
+  const { urlId } = req.params;
+
+  if (!urlId || isNaN(Number(urlId))) {
+    return res.status(401).send({ error: "Url sent as params is not valid" });
+  }
+
+  try {
+    const url = await connection.query(
+      `SELECT "id", "userId", "shortUrl", "fullUrl" AS url FROM urls WHERE id = $1;`,
+      [urlId]
+    );
+
+    if (url.rowCount === 0) {
+      return res.status(404).send({ error: "Url does not exist" });
+    }
+
+    if (url.rows[0].userId !== userId) {
+      return res.status(401).send({ error: "Url does not belong to user" });
+    }
+
+    await connection.query("DELETE FROM urls WHERE id = $1;", [urlId]);
+    return res.status(204).send({ message: "Url deleted" });
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export { shortUrl, getUrlById, deleteUrlById };
