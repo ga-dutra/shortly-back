@@ -84,4 +84,30 @@ async function deleteUrlById(req, res) {
   }
 }
 
-export { shortUrl, getUrlById, deleteUrlById };
+async function redirectUser(req, res) {
+  const { urlId } = req.params;
+
+  if (!urlId || isNaN(Number(urlId))) {
+    return res.status(401).send({ error: "Url sent as params is not valid" });
+  }
+  try {
+    const url = await connection.query(
+      `SELECT "id", "userId", "shortUrl", "fullUrl" AS url FROM urls WHERE id = $1;`,
+      [urlId]
+    );
+
+    if (url.rowCount === 0) {
+      return res.status(404).send({ error: "Url does not exist" });
+    }
+
+    await connection.query(`INSERT INTO visits ("urlId") VALUES ($1);`, [
+      urlId,
+    ]);
+    console.log(url.rows[0].url);
+    return res.redirect(url.rows[0].url);
+  } catch (error) {
+    return res.status(500).send(error.message);
+  }
+}
+
+export { shortUrl, getUrlById, deleteUrlById, redirectUser };
