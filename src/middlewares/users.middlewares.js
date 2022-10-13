@@ -18,7 +18,7 @@ async function validateNewUser(req, res, next) {
 
   try {
     const existingUser = await connection.query(
-      `SELECT * FROM users WHERE email = $1`,
+      `SELECT * FROM users WHERE email = $1;`,
       [req.body.email]
     );
 

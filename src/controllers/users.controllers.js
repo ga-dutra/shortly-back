@@ -8,7 +8,7 @@ async function createNewUser(req, res) {
 
   try {
     await connection.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3);",
       [name, email, passwordHash]
     );
     return res.status(201).send({ message: "User created!" });
@@ -18,13 +18,12 @@ async function createNewUser(req, res) {
 }
 
 async function postLogin(req, res) {
-  const { email, password } = req.body;
   const user = res.locals.user;
   const token = uuid();
   const sessionType = "login";
   try {
     await connection.query(
-      `INSERT INTO sessions ("userId", token, type) VALUES ($1, $2, $3)`,
+      `INSERT INTO sessions ("userId", token, type) VALUES ($1, $2, $3);`,
       [user.id, token, sessionType]
     );
     return res.status(200).send({ token: token });
