@@ -6,6 +6,7 @@ const app = express();
 
 import usersRouter from "./routes/users.router.js";
 import urlsRouter from "./routes/urls.router.js";
+import rankingRouter from "./routes/ranking.router.js";
 
 dotenv.config();
 app.use(cors());
@@ -15,6 +16,7 @@ const PORT = process.env.PORT || 4000;
 
 app.use("/auth", usersRouter);
 app.use("/urls", urlsRouter);
+app.use("", rankingRouter);
 
 app.listen(PORT, () => {
   console.log("Server is listening on port", PORT);
