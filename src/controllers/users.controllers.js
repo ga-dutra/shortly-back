@@ -1,16 +1,13 @@
-import connection from "../database/database.js";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
+import * as userRepository from "../repositories/users.repositories.js";
 
 async function createNewUser(req, res) {
-  const { name, email, password, confirmPassword } = req.body;
+  const { name, email, password } = req.body;
   const passwordHash = bcrypt.hashSync(password, 10);
 
   try {
-    await connection.query(
-      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3);",
-      [name, email, passwordHash]
-    );
+    await userRepository.insertNewUser(name, email, passwordHash);
     return res.status(201).send({ message: "User created!" });
   } catch (error) {
     return res.status(500).send(error.message);
@@ -22,14 +19,8 @@ async function postLogin(req, res) {
   const token = uuid();
 
   try {
-    await connection.query(
-      `INSERT INTO active_sessions ("userId", token) VALUES ($1, $2);`,
-      [user.id, token]
-    );
-    await connection.query(
-      `INSERT INTO history_sessions ("userId") VALUES ($1);`,
-      [user.id]
-    );
+    await userRepository.insertActiveSession(user.id, token);
+    await userRepository.insertHistorySession(user.id);
     return res.status(200).send({ token: token });
   } catch (error) {
     return res.status(500).send(error.message);
@@ -41,20 +32,8 @@ async function listUserLinks(req, res) {
   const userName = res.locals.userName;
   let userVisitCount = 0;
   try {
-    const allUserLinks = await connection.query(
-      'SELECT "id" AS "urlId", "shortUrl", "fullUrl" as url FROM urls WHERE ("userId") = $1;',
-      [userId]
-    );
-
-    const visitedUserLinks = await connection.query(
-      `SELECT urls.id AS "urlId", COUNT(*) AS "visitCount" 
-    FROM visits 
-    JOIN urls ON urls.id = visits."urlId"
-    JOIN users ON users.id = urls."userId"
-    WHERE "userId" = $1
-    GROUP BY urls.id;`,
-      [userId]
-    );
+    const allUserLinks = await userRepository.listUserLinks(userId);
+    const visitedUserLinks = await userRepository.listVisitedUserLinks(userId);
 
     const model = [];
     allUserLinks.rows.forEach((obj) => {

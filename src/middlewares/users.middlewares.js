@@ -1,5 +1,5 @@
-import connection from "../database/database.js";
 import bcrypt from "bcrypt";
+import * as userRepository from "../repositories/users.repositories.js";
 import { newUserSchema, userLoginSchema } from "../models/users.schemas.js";
 
 async function validateNewUser(req, res, next) {
@@ -17,10 +17,7 @@ async function validateNewUser(req, res, next) {
   }
 
   try {
-    const existingUser = await connection.query(
-      `SELECT * FROM users WHERE email = $1;`,
-      [req.body.email]
-    );
+    const existingUser = await userRepository.findExistingUser(req.body.email);
 
     if (existingUser.rowCount !== 0) {
       return res.status(409).send({ error: "User already exists!" });
@@ -47,11 +44,7 @@ async function validateLogin(req, res, next) {
   }
 
   try {
-    const existingUser = await connection.query(
-      `
-      SELECT * FROM users WHERE email = $1;`,
-      [email]
-    );
+    const existingUser = await userRepository.findExistingUser(email);
     if (existingUser.rowCount !== 0) {
       passwordIsValid = bcrypt.compareSync(
         password,
