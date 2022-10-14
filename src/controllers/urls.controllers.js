@@ -104,6 +104,7 @@ async function redirectUser(req, res) {
       urlId,
     ]);
 
+    console.log(url.rows[0].url);
     return res.redirect(url.rows[0].url);
   } catch (error) {
     return res.status(500).send(error.message);
