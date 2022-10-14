@@ -9,7 +9,7 @@ async function validateToken(req, res, next) {
 
   try {
     const session = await connection.query(
-      `SELECT * FROM sessions WHERE token = $1;`,
+      `SELECT * FROM active_sessions WHERE token = $1;`,
       [token]
     );
     if (session.rowCount === 0) {
@@ -17,7 +17,7 @@ async function validateToken(req, res, next) {
     }
 
     const user = await connection.query(
-      `SELECT sessions."userId", users."name" FROM sessions JOIN users ON users.id = sessions."userId" WHERE token = $1;`,
+      `SELECT active_sessions."userId", users."name" FROM active_sessions JOIN users ON users.id = active_sessions."userId" WHERE token = $1;`,
       [token]
     );
 

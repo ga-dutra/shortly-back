@@ -20,11 +20,15 @@ async function createNewUser(req, res) {
 async function postLogin(req, res) {
   const user = res.locals.user;
   const token = uuid();
-  const sessionType = "login";
+
   try {
     await connection.query(
-      `INSERT INTO sessions ("userId", token, type) VALUES ($1, $2, $3);`,
-      [user.id, token, sessionType]
+      `INSERT INTO active_sessions ("userId", token) VALUES ($1, $2);`,
+      [user.id, token]
+    );
+    await connection.query(
+      `INSERT INTO history_sessions ("userId") VALUES ($1);`,
+      [user.id]
     );
     return res.status(200).send({ token: token });
   } catch (error) {
