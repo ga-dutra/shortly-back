@@ -1,4 +1,4 @@
-import connection from "../database/database.js";
+import * as userRepository from "../repositories/users.repositories.js";
 
 async function validateToken(req, res, next) {
   const authorization = req.headers.authorization;
@@ -8,18 +8,13 @@ async function validateToken(req, res, next) {
   }
 
   try {
-    const session = await connection.query(
-      `SELECT * FROM active_sessions WHERE token = $1;`,
-      [token]
-    );
+    const session = await userRepository.getSessionByToken(token);
+
     if (session.rowCount === 0) {
       return res.status(401).send({ error: "Session not found" });
     }
 
-    const user = await connection.query(
-      `SELECT active_sessions."userId", users."name" FROM active_sessions JOIN users ON users.id = active_sessions."userId" WHERE token = $1;`,
-      [token]
-    );
+    const user = await userRepository.getUserByToken(token);
 
     if (user.rowCount === 0) {
       return res.status(404).send({ error: "User not found" });

@@ -77,6 +77,30 @@ async function listVisitedUserLinks(userId) {
   }
 }
 
+async function getSessionByToken(token) {
+  try {
+    const session = await connection.query(
+      `SELECT * FROM active_sessions WHERE token = $1;`,
+      [token]
+    );
+    return session;
+  } catch (error) {
+    return error.message;
+  }
+}
+
+async function getUserByToken(token) {
+  try {
+    const user = await connection.query(
+      `SELECT active_sessions."userId", users."name" FROM active_sessions JOIN users ON users.id = active_sessions."userId" WHERE token = $1;`,
+      [token]
+    );
+    return user;
+  } catch (error) {
+    return error.message;
+  }
+}
+
 export {
   findExistingUser,
   insertNewUser,
@@ -84,4 +108,6 @@ export {
   insertHistorySession,
   listUserLinks,
   listVisitedUserLinks,
+  getSessionByToken,
+  getUserByToken,
 };
