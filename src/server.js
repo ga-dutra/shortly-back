@@ -19,7 +19,7 @@ app.use("/auth", usersRouter);
 app.use("/urls", urlsRouter);
 app.use("", rankingRouter);
 
-// setInterval(sessionCheck, 1000 * 20);
+setInterval(sessionCheck, 1000 * 60 * 60);
 
 app.listen(PORT, () => {
   console.log("Server is listening on port", PORT);
